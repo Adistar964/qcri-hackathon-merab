@@ -1,0 +1,13 @@
+{
+  "name": "fanar-agent-desktop",
+  "version": "1.0.0",
+  "description": "Fanar Agent — desktop shell (Electron)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "devDependencies": {
+    "electron": "33.2.1"
+  }
+}

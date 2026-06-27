@@ -1,0 +1,13 @@
+# NOTE: lower-bound pins (>=) so this installs cleanly on newer Pythons
+# (e.g. 3.14), which need recent wheels. Tested on Python 3.12–3.14.
+fastapi>=0.115.6
+uvicorn>=0.34.0          # plain uvicorn: --reload falls back to StatReload (no compiled httptools/watchfiles needed on 3.14)
+httpx>=0.28.1
+python-dotenv>=1.0.1
+pydantic>=2.11.7         # 2.11.x pulls pydantic-core with cp314 wheels (2.10.x did not)
+python-multipart>=0.0.20
+playwright>=1.49.0
+mss>=9.0.2
+pillow>=11.3.0           # first Pillow release with cp314 wheels
+pyautogui>=0.9.54
+uiautomation>=2.0.29

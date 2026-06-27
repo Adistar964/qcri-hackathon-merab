@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #0a1730;
+  color: #fafafa;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #4c8dff;
+  color: #04122b;
+}
+
+/* Brutalist scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a1730;
+}
+::-webkit-scrollbar-thumb {
+  background: #24365c;
+  border: 2px solid #0a1730;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4c8dff;
+}
+
+/* Print-poster noise texture overlay */
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Edge-to-edge marquee (CSS, GPU transform) */
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* Hairline divider used between connected brutalist cards */
+.grid-hairline {
+  background: #24365c;
+}
+
+/* Typing indicator */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+.typing-dot { animation: pulse-dot 1.1s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.18s; }
+.typing-dot:nth-child(3) { animation-delay: 0.36s; }
+
+/* Glow ring for the human-in-the-loop call to action */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 141, 255, 0.0), 0 0 24px rgba(76, 141, 255, 0.30); }
+  50% { box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.14), 0 0 34px rgba(76, 141, 255, 0.55); }
+}
+.glow { animation: glow 1.8s ease-in-out infinite; }
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(76,141,255,0.06) 25%, rgba(76,141,255,0.22) 37%, rgba(76,141,255,0.06) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Electron frameless window drag regions (no effect in a browser) */
+.drag-region { -webkit-app-region: drag; }
+.no-drag { -webkit-app-region: no-drag; }
+
+/* Respect reduced-motion: stop marquees and long animations */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .glow,
+  .shimmer {
+    animation: none !important;
+  }
+}
