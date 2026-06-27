@@ -62,8 +62,8 @@ export function StepTimeline({ steps }: { steps: TraceStep[] }) {
   // number only the tool actions
   let n = 0;
   return (
-    <div className="mt-3 border-t-2 border-line pt-3">
-      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+    <div className="mt-3 border-t border-line pt-3">
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.3em] text-accent/80">
         ── Agent Trace
       </div>
       <ul className="space-y-2.5">
@@ -77,7 +77,7 @@ export function StepTimeline({ steps }: { steps: TraceStep[] }) {
 
               {s.type === "action" && (
                 <div className="flex items-center gap-3">
-                  <span className="w-12 shrink-0 text-right font-display text-3xl font-bold leading-none text-muted">
+                  <span className="w-12 shrink-0 text-right font-display text-3xl font-bold leading-none text-muted-foreground/30">
                     {String(n).padStart(2, "0")}
                   </span>
                   <div className="min-w-0 flex-1 border-l-2 border-accent pl-3">
@@ -102,7 +102,7 @@ export function StepTimeline({ steps }: { steps: TraceStep[] }) {
                   href={`/api/screenshot/${s.url}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="ml-[3.2rem] block max-w-md border-2 border-line transition hover:border-accent"
+                  className="ml-[3.2rem] block max-w-md overflow-hidden rounded-xl border border-line transition-all duration-200 ease-expo-out hover:border-accent/60"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`/api/screenshot/${s.url}`} alt={s.title || "frame"} className="max-h-44 w-full object-cover object-top" />
@@ -110,19 +110,19 @@ export function StepTimeline({ steps }: { steps: TraceStep[] }) {
               )}
 
               {s.type === "awaiting_user" && (
-                <div className="ml-[3.2rem] border-l-4 border-maroon bg-maroon/10 px-3 py-1.5 text-sm font-medium text-sand">
+                <div className="ml-[3.2rem] rounded-r-lg border-l-2 border-maroon bg-maroon/10 px-3 py-1.5 text-sm font-medium text-sand">
                   {s.reason}
                 </div>
               )}
 
               {s.type === "stopped" && (
-                <div className="ml-[3.2rem] border-l-4 border-maroon bg-maroon/10 px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-maroon">
+                <div className="ml-[3.2rem] rounded-r-lg border-l-2 border-maroon bg-maroon/10 px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-maroon">
                   ■ {s.content}
                 </div>
               )}
 
               {s.type === "error" && (
-                <div className="ml-[3.2rem] border-l-4 border-maroon bg-maroon/10 px-3 py-1.5 text-sm text-maroon">
+                <div className="ml-[3.2rem] rounded-r-lg border-l-2 border-maroon bg-maroon/10 px-3 py-1.5 text-sm text-maroon">
                   {s.content}
                 </div>
               )}
@@ -152,7 +152,7 @@ function renderObs(result: Record<string, unknown>) {
     return <p className="flex items-start gap-1.5 text-[12px] leading-relaxed text-muted-foreground"><Icon name="eye" size={13} className="mt-0.5 shrink-0" /> {String(result.understanding).slice(0, 200)}…</p>;
   if (result?.saved_to)
     return (
-      <span className="inline-flex items-center gap-1 border border-accent/50 bg-accent/10 px-2 py-0.5 text-[11px] uppercase tracking-wide text-accent">
+      <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[11px] uppercase tracking-wide text-accent">
         <Icon name="check" size={11} /> saved · {String(result.saved_to)}
       </span>
     );

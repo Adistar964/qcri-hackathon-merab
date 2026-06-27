@@ -77,7 +77,7 @@ export function Markdown({ content, className = "" }: { content: string; classNa
       i++; // skip closing fence
       blocks.push(
         <pre key={key++}
-             className="my-2 overflow-x-auto border-2 border-line bg-foreground/5 p-3 font-mono text-[13px] leading-relaxed text-foreground">
+             className="my-2 overflow-x-auto rounded-xl border border-line bg-foreground/5 p-3 font-mono text-[13px] leading-relaxed text-foreground">
           <code>{buf.join("\n")}</code>
         </pre>
       );

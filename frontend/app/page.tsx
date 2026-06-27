@@ -384,12 +384,16 @@ export default function Home() {
 
   const fresh = messages.length === 0;
 
+  // Shared chrome-button styling (nav + window controls).
+  const navBtn =
+    "flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-semibold uppercase tracking-tight text-muted-foreground transition-all duration-200 ease-expo-out hover:border-accent/60 hover:text-accent disabled:opacity-40";
+
   return (
     <div className="mx-auto flex h-screen max-w-[1400px] flex-col">
       {/* NAV */}
-      <header className="drag-region flex items-center gap-4 border-b-2 border-line px-5 py-3">
+      <header className="drag-region flex items-center gap-4 border-b border-line px-5 py-3 backdrop-blur-md">
         <FanarMark />
-        <span className="ml-1 flex items-center gap-1.5 border-2 border-line px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <span className="ml-1 flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           <Icon name={surface === "desktop" ? "monitor" : "globe"} size={12} />
           {surface === "desktop" ? t("badge.desktop") : t("badge.web")}
         </span>
@@ -397,21 +401,21 @@ export default function Home() {
           <button
             onClick={() => setLang((l) => (l === "ar" ? "en" : "ar"))}
             title={t("nav.langTitle")}
-            className="flex h-9 items-center gap-1.5 border-2 border-line px-3 text-xs font-bold uppercase tracking-tight text-muted-foreground transition hover:border-accent hover:text-accent"
+            className={navBtn}
           >
             <Icon name="globe" size={14} /> {lang === "ar" ? "EN" : "ع"}
           </button>
           <button
             onClick={() => setHistoryOpen(true)}
             title={t("nav.historyTitle")}
-            className="flex h-9 items-center gap-1.5 border-2 border-line px-3 text-xs font-bold uppercase tracking-tight text-muted-foreground transition hover:border-accent hover:text-accent"
+            className={navBtn}
           >
             <Icon name="clock" size={14} /> {t("nav.history")}
           </button>
           <button
             onClick={() => setProfileOpen(true)}
             title={t("nav.myInfoTitle")}
-            className="flex h-9 items-center gap-1.5 border-2 border-line px-3 text-xs font-bold uppercase tracking-tight text-muted-foreground transition hover:border-accent hover:text-accent"
+            className={navBtn}
           >
             <Icon name="id-card" size={14} /> {t("nav.myInfo")}
           </button>
@@ -419,7 +423,7 @@ export default function Home() {
             onClick={newConversation}
             disabled={busy}
             title={t("nav.newTitle")}
-            className="flex h-9 items-center gap-1.5 border-2 border-line px-3 text-xs font-bold uppercase tracking-tight text-muted-foreground transition hover:border-accent hover:text-accent disabled:opacity-40"
+            className={navBtn}
           >
             <Icon name="plus" size={14} /> {t("nav.new")}
           </button>
@@ -427,21 +431,21 @@ export default function Home() {
             onClick={deleteConversation}
             disabled={busy || fresh}
             title={t("nav.deleteTitle")}
-            className="flex h-9 w-9 items-center justify-center border-2 border-line text-muted-foreground transition hover:border-maroon hover:text-maroon disabled:opacity-40"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon disabled:opacity-40"
           >
             <Icon name="trash" size={15} />
           </button>
           <button
             onClick={() => setVoiceOut((v) => !v)}
             title={t("nav.voiceTitle")}
-            className={`h-9 border-2 px-3 text-xs font-bold uppercase tracking-tight transition ${voiceOut ? "border-accent bg-accent text-accent-foreground" : "border-line text-muted-foreground hover:text-foreground"}`}
+            className={`flex h-9 items-center rounded-lg border px-3 text-xs font-semibold uppercase tracking-tight transition-all duration-200 ease-expo-out ${voiceOut ? "border-accent bg-accent text-accent-foreground" : "border-line text-muted-foreground hover:text-foreground"}`}
           >
             {t("nav.voice")} {voiceOut ? t("nav.on") : t("nav.off")}
           </button>
-          <div className="flex border-2 border-line">
+          <div className="flex rounded-lg border border-white/[0.06] bg-white/[0.02] p-1 backdrop-blur-sm">
             {(["chat", "agent"] as Mode[]).map((m) => (
               <button key={m} onClick={() => switchMode(m)}
-                className={`px-4 py-1.5 text-xs font-bold uppercase tracking-tight transition ${mode === m ? "bg-foreground text-bg" : "text-muted-foreground hover:text-foreground"}`}>
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all duration-300 ${mode === m ? "bg-accent text-white shadow-accent-glow animate-glow-pulse" : "text-muted-foreground hover:scale-105 hover:bg-white/[0.05] hover:text-foreground"}`}>
                 {t(`mode.${m}`)}
               </button>
             ))}
@@ -449,9 +453,9 @@ export default function Home() {
           {surface === "desktop" && (
             <div className="flex items-center gap-1">
               <button onClick={() => (window as any).fanarDesktop?.minimize?.()} title={t("nav.minimize")}
-                className="flex h-9 w-9 items-center justify-center border-2 border-line text-muted-foreground hover:text-foreground">─</button>
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted-foreground hover:text-foreground">─</button>
               <button onClick={() => (window as any).fanarDesktop?.close?.()} title={t("nav.close")}
-                className="flex h-9 w-9 items-center justify-center border-2 border-line text-muted-foreground hover:border-maroon hover:text-maroon"><Icon name="x" size={14} /></button>
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted-foreground hover:border-maroon hover:text-maroon"><Icon name="x" size={14} /></button>
             </div>
           )}
         </div>
@@ -463,7 +467,7 @@ export default function Home() {
       {/* BODY */}
       <div className={`grid min-h-0 flex-1 ${mode === "agent" && !fresh ? "lg:grid-cols-[1fr_400px]" : "grid-cols-1"}`}>
         <div className="flex min-h-0 flex-col">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5">
+          <div ref={scrollRef} className="no-scrollbar flex-1 overflow-y-auto px-5 py-5">
             {fresh ? (
               <Hero mode={mode} surface={surface} onPick={send} lang={lang} />
             ) : (
@@ -471,11 +475,11 @@ export default function Home() {
                 {messages.map((m, i) => (
                   <div key={i} className={`animate-fade-up ${m.role === "user" ? "flex justify-end" : ""}`}>
                     {m.role === "user" ? (
-                      <div className="max-w-[85%] border-2 border-accent bg-accent/10 px-4 py-2.5 text-sm text-foreground" dir="auto">
+                      <div className="max-w-[85%] rounded-2xl border border-accent/30 bg-accent/[0.08] px-4 py-2.5 text-sm text-foreground backdrop-blur-sm" dir="auto">
                         {m.content}
                       </div>
                     ) : (
-                      <div className={`${rtl ? "border-r-2 pr-4" : "border-l-2 pl-4"} border-line`}>
+                      <div className={`${rtl ? "border-r pr-4" : "border-l pl-4"} border-accent/40`}>
                         <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.3em] text-accent">Fanar</div>
                         {m.trace && m.trace.length > 0 && (
                           <TraceDisclosure steps={m.trace} busy={busy && i === messages.length - 1} />
@@ -486,7 +490,7 @@ export default function Home() {
                           </div>
                         ) : busy ? (
                           <div className="flex gap-1 py-2">
-                            <span className="typing-dot h-2 w-2 bg-accent" /><span className="typing-dot h-2 w-2 bg-accent" /><span className="typing-dot h-2 w-2 bg-accent" />
+                            <span className="typing-dot h-2 w-2 rounded-full bg-accent" /><span className="typing-dot h-2 w-2 rounded-full bg-accent" /><span className="typing-dot h-2 w-2 rounded-full bg-accent" />
                           </div>
                         ) : null}
                       </div>
@@ -498,53 +502,58 @@ export default function Home() {
           </div>
 
           {/* COMMAND BAR */}
-          <div className="border-t-2 border-line px-5 py-4">
+          <div className="border-t border-line px-5 py-4 backdrop-blur-md">
             {agentLocked ? (
-              <div className="mx-auto flex max-w-3xl items-center gap-3 border-2 border-line bg-muted/40 px-4 py-3">
+              <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-line bg-surface/40 px-4 py-3 backdrop-blur-sm">
                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   {t("locked.note")}
                 </span>
                 <button
                   onClick={newConversation}
                   disabled={busy}
-                  className="ms-auto h-9 shrink-0 bg-accent px-4 text-xs font-bold uppercase tracking-tight text-accent-foreground transition hover:scale-[1.03] active:scale-95 disabled:opacity-40"
+                  className="ms-auto h-9 shrink-0 rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-tight text-accent-foreground transition-all duration-200 ease-expo-out hover:opacity-90 hover:scale-[1.02] active:scale-95 disabled:opacity-40"
                 >
                   <span className="flex items-center justify-center gap-1.5"><Icon name="plus" size={14} /> {t("locked.new")}</span>
                 </button>
                 {busy && (
                   <button
                     onClick={stopAgent}
-                    className="h-9 shrink-0 border-2 border-maroon bg-maroon px-4 text-xs font-bold uppercase tracking-tight text-foreground transition hover:scale-[1.03] active:scale-95"
+                    className="group relative inline-flex h-9 shrink-0 items-center gap-2 overflow-hidden rounded-xl border border-maroon/25 px-4 text-xs font-medium text-[#D89A8A] transition-all duration-300 ease-expo-out [background:linear-gradient(180deg,rgba(183,112,127,0.16)_0%,rgba(183,112,127,0.09)_100%)] shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] btn-sheen [--btn-sheen-tint:rgba(232,176,140,0.3)] [--btn-sheen-speed:5.5s] hover:border-maroon/45 hover:text-[#E9B58C] hover:[background:linear-gradient(180deg,rgba(183,112,127,0.24)_0%,rgba(183,112,127,0.14)_100%)] hover:[--btn-sheen-speed:2.6s] active:scale-[0.98]"
                   >
-                    {t("cmd.stop")}
+                    <span className="btn-stop-dot" aria-hidden="true" />
+                    <span className="relative z-[2]">{t("cmd.stop")}</span>
                   </button>
                 )}
               </div>
             ) : (
               <div className="mx-auto flex max-w-3xl items-center gap-2">
                 <VoiceButton onTranscript={(t) => setInput((p) => (p ? p + " " : "") + t)} disabled={busy} />
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(input); } }}
-                  placeholder={mode === "agent" ? t("cmd.placeholderAgent") : t("cmd.placeholderChat")}
-                  dir="auto"
-                  className="h-12 flex-1 border-b-2 border-line bg-transparent px-1 text-base font-medium text-foreground placeholder-muted focus:border-accent focus:outline-none"
-                />
+                <div className="group relative flex-1">
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(input); } }}
+                    placeholder={mode === "agent" ? t("cmd.placeholderAgent") : t("cmd.placeholderChat")}
+                    dir="auto"
+                    className="h-14 w-full rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.04] px-5 text-base font-medium text-foreground placeholder:text-foreground-subtle backdrop-blur-xl transition-all duration-300 focus:border-accent focus:bg-white/[0.1] focus:shadow-[0_0_0_3px_rgba(176,141,87,0.3),0_4px_20px_rgba(176,141,87,0.2)] focus:outline-none"
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 transition-opacity duration-500 group-focus-within:opacity-100" />
+                </div>
                 {busy ? (
                   <button onClick={stopAgent}
-                    className="h-12 border-2 border-maroon bg-maroon px-6 text-sm font-bold uppercase tracking-tight text-foreground transition hover:scale-[1.03] active:scale-95">
-                    {t("cmd.stop")}
+                    className="group relative inline-flex h-14 shrink-0 items-center gap-2.5 overflow-hidden rounded-xl border border-maroon/25 px-6 text-base font-medium text-[#D89A8A] transition-all duration-300 ease-expo-out [background:linear-gradient(180deg,rgba(183,112,127,0.16)_0%,rgba(183,112,127,0.09)_100%)] shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] btn-sheen [--btn-sheen-tint:rgba(232,176,140,0.3)] [--btn-sheen-speed:5.5s] hover:border-maroon/45 hover:text-[#E9B58C] hover:[background:linear-gradient(180deg,rgba(183,112,127,0.24)_0%,rgba(183,112,127,0.14)_100%)] hover:[--btn-sheen-speed:2.6s] active:scale-[0.98]">
+                    <span className="btn-stop-dot" aria-hidden="true" />
+                    <span className="relative z-[2]">{t("cmd.stop")}</span>
                   </button>
                 ) : (
                   <button onClick={() => send(input)} disabled={!input.trim()}
-                    className="h-12 bg-accent px-6 text-sm font-bold uppercase tracking-tight text-accent-foreground transition hover:scale-[1.03] active:scale-95 disabled:opacity-40">
-                    {t("cmd.send")}
+                    className="group relative h-14 shrink-0 overflow-hidden rounded-xl px-6 text-base font-medium text-accent-foreground transition-all duration-300 ease-expo-out [background:linear-gradient(180deg,#C6A268_0%,#B08D57_55%,#9E7C4A_100%)] shadow-[0_1px_0_0_rgba(255,255,255,0.22)_inset,0_-1px_0_0_rgba(0,0,0,0.18)_inset,0_2px_10px_-2px_rgba(176,141,87,0.45)] btn-sheen [--btn-sheen-tint:rgba(255,247,235,0.5)] enabled:btn-send-breathe hover:brightness-[1.06] hover:[--btn-sheen-speed:1.8s] active:scale-[0.98] active:brightness-100 disabled:cursor-not-allowed disabled:[background:#2E3A4F] disabled:text-foreground-subtle disabled:shadow-none disabled:brightness-100">
+                    <span className="relative z-[2]">{t("cmd.send")}<span className="btn-send-arrow" aria-hidden="true">→</span></span>
                   </button>
                 )}
               </div>
             )}
-            <p className="mx-auto mt-2 max-w-3xl text-[10px] uppercase tracking-wider text-muted">
+            <p className="mx-auto mt-2 max-w-3xl text-[10px] uppercase tracking-wider text-muted-foreground/60">
               {mode === "agent"
                 ? surface === "desktop"
                   ? t("cmd.helperAgentDesktop")
@@ -556,7 +565,7 @@ export default function Home() {
 
         {/* LIVE PREVIEW */}
         {mode === "agent" && !fresh && (
-          <div className="min-h-0 overflow-y-auto border-l-2 border-line p-4">
+          <div className="min-h-0 overflow-y-auto border-l border-line p-4">
             <LivePreview lang={lang} shot={shot} pending={pending} busy={busy} surface={surface} files={files} sessionId={sessionId.current} apiBase={API_BASE} onResume={resume} onCredentials={submitCredentials} onSubmitInputs={submitInputs} onSubmitCaptcha={submitCaptcha} onSubmitOtp={submitOtp} onCancel={() => resume("cancelled", false)} />
           </div>
         )}
@@ -581,9 +590,9 @@ export default function Home() {
 
       {/* Styled mode-switch confirmation (matches the platform; replaces the browser confirm()) */}
       {modeSwitch && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/80 p-4 backdrop-blur-sm"
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
              onClick={() => setModeSwitch(null)}>
-          <div className="glow w-full max-w-md border-2 border-accent bg-surface p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="glow animate-scale-in w-full max-w-md rounded-2xl border border-accent/40 bg-surface/90 p-6 backdrop-blur-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-accent">
               {t("switch.title", { mode: t(`mode.${modeSwitch}`) })}
             </div>
@@ -593,13 +602,13 @@ export default function Home() {
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => doSwitchMode(modeSwitch)}
-                className="flex-1 bg-accent px-4 py-3 text-sm font-bold uppercase tracking-tight text-accent-foreground transition hover:scale-[1.02] active:scale-95"
+                className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-bold uppercase tracking-tight text-accent-foreground transition-all duration-200 ease-expo-out hover:opacity-90 hover:scale-[1.02] active:scale-95"
               >
                 {t("switch.confirm")}
               </button>
               <button
                 onClick={() => setModeSwitch(null)}
-                className="border-2 border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition hover:border-maroon hover:text-maroon"
+                className="rounded-xl border border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
               >
                 {t("switch.cancel")}
               </button>
@@ -611,34 +620,83 @@ export default function Home() {
   );
 }
 
+// Letter-by-letter color cycle (MERAB signature). Spaces become non-breaking so the
+// inline-block letters keep their width. Only used for Latin text (not Arabic).
+function ColorShiftText({ text }: { text: string }) {
+  return (
+    <span className="text-color-shift">
+      {text.split("").map((ch, i) => (
+        <span key={i} style={{ animationDelay: `${(i * 0.1).toFixed(1)}s` }}>
+          {ch === " " ? " " : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function Hero({ mode, surface, onPick, lang }: { mode: Mode; surface: Surface; onPick: (t: string) => void; lang: Lang }) {
   const t = makeT(lang);
   const ar = lang === "ar";
-  return (
-    <div className="mx-auto max-w-5xl py-6">
-      <h1 className="font-display text-[clamp(2.5rem,9vw,7rem)] font-bold uppercase leading-[0.82] tracking-tightest text-foreground">
-        {t("hero.title1")}
-        <br />
-        <span className="text-accent">{t("hero.title2")}</span>
-      </h1>
-      <p className="mt-5 max-w-2xl text-lg leading-tight text-muted-foreground">
-        {t("hero.subtitle")}
-      </p>
 
-      <div className="mt-9 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-        {mode === "agent" ? t("hero.tryAgent") : t("hero.tryQuestion")}
-      </div>
-      <div className="mt-3 grid gap-px bg-line sm:grid-cols-2">
-        {(mode === "agent" ? AGENT_ACTIONS : CHAT_ACTIONS).map((q, i) => (
-          <button key={i} onClick={() => onPick(ar ? q.textAr : q.text)}
-            className="group flex items-center gap-4 bg-bg px-5 py-4 text-start transition-colors duration-200 hover:bg-accent">
-            <span className="font-display text-2xl font-bold leading-none text-muted group-hover:text-accent-foreground">{String(i + 1).padStart(2, "0")}</span>
-            <span className="min-w-0">
-              <span className="me-2 text-[10px] font-bold uppercase tracking-wide text-accent group-hover:text-accent-foreground">{ar ? q.labelAr : q.label}</span>
-              <span className="text-[14px] font-medium text-foreground group-hover:text-accent-foreground" dir="auto">{ar ? q.textAr : q.text}</span>
-            </span>
-          </button>
-        ))}
+  // Move the gold spotlight to follow the cursor inside a card.
+  const onMove = (e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - r.top}px`);
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl py-10 pt-4">
+      <h1 className="text-center font-display text-[clamp(2.5rem,9vw,7rem)] font-extrabold leading-[0.9] tracking-tightest text-foreground">
+        {ar ? (
+          <>
+            {t("hero.title1")}
+            <br />
+            <span className="text-accent">{t("hero.title2")}</span>
+          </>
+        ) : (
+          <>
+            <ColorShiftText text={t("hero.title1")} />
+            <br />
+            <span className="text-accent">{t("hero.title2")}</span>
+          </>
+        )}
+      </h1>
+
+      <div className="mt-10 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <span className="animate-pulse-glow font-mono text-xs uppercase tracking-widest text-foreground-subtle">
+            {mode === "agent" ? t("hero.tryAgent") : t("hero.tryQuestion")}
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(mode === "agent" ? AGENT_ACTIONS : CHAT_ACTIONS).map((q, i) => (
+            <button
+              key={i}
+              onClick={() => onPick(ar ? q.textAr : q.text)}
+              onMouseMove={onMove}
+              style={{ animationDelay: `${(i * 0.08).toFixed(2)}s` }}
+              className="card-spotlight group animate-fade-up cursor-pointer rounded-2xl border border-line bg-surface/40 p-5 text-start backdrop-blur-xl transition-all duration-300 ease-expo-out hover:-translate-y-1 hover:border-line-hover hover:shadow-card-hover"
+            >
+              <div className="relative z-10 flex items-start gap-4">
+                <span className="font-display text-3xl font-bold leading-none text-foreground-subtle transition-all duration-200 group-hover:scale-110 group-hover:text-gradient-accent">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-accent group-hover:animate-shimmer">
+                    {ar ? q.labelAr : q.label}
+                  </div>
+                  <p className="text-sm leading-relaxed text-foreground transition-colors duration-200 group-hover:text-white" dir="auto">
+                    {ar ? q.textAr : q.text}
+                  </p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

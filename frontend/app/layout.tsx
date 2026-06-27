@@ -1,26 +1,35 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import dynamic from "next/dynamic";
+import { Inter } from "next/font/google";
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
   display: "swap",
 });
 
+// WebGL mesh-gradient background — client-only (needs WebGL, no SSR).
+const MeshBackground = dynamic(() => import("@/components/ui/MeshBackground"), { ssr: false });
+
 export const metadata: Metadata = {
-  title: "FANAR AGENT — Agentic AI for Government · Healthcare · Education",
+  title: "MERAB AGENT — Agentic AI for Government · Healthcare · Education",
   description:
     "A desktop-grade agentic AI built on Fanar: drives a real browser, sees your screen, controls your computer, and speaks — specialized for Qatar's government, healthcare, and education.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={spaceGrotesk.variable}>
-      <body className="min-h-screen bg-bg font-sans">
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen bg-black font-sans">
+        {/* Animated MERAB shader background */}
+        <div className="fixed inset-0 -z-10">
+          <MeshBackground />
+        </div>
+        <div className="grid-overlay" aria-hidden="true" />
         <div className="noise" aria-hidden="true" />
-        {children}
+        <main className="relative z-10 min-h-screen">{children}</main>
       </body>
     </html>
   );

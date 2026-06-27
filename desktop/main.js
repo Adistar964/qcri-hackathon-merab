@@ -30,10 +30,10 @@ function createWindow() {
     height: 860,
     minWidth: 940,
     minHeight: 640,
-    backgroundColor: "#0A1730",
+    backgroundColor: "#000000",
     frame: false, // frameless — custom controls live in the React header
     show: false,
-    title: "Fanar Agent",
+    title: "Merab Agent",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -74,7 +74,7 @@ app.whenReady().then(() => {
   // System tray.
   try {
     tray = new Tray(path.join(__dirname, "trayTemplate.png"));
-    tray.setToolTip("Fanar Agent");
+    tray.setToolTip("Merab Agent");
     tray.setContextMenu(
       Menu.buildFromTemplate([
         { label: "Show / Hide  (Ctrl+Shift+F)", click: toggleWindow },

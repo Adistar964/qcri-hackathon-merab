@@ -59,13 +59,13 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-bg/70 backdrop-blur-sm" onClick={onClose} />
-      <aside className="animate-slide-in relative flex h-full w-full max-w-2xl flex-col border-s-2 border-line bg-surface">
-        <div className="flex items-center gap-3 border-b-2 border-line px-5 py-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <aside className="animate-slide-in relative flex h-full w-full max-w-2xl flex-col border-s border-line bg-surface/95 backdrop-blur-xl">
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4">
           {selected ? (
             <button
               onClick={() => setSelected(null)}
-              className="flex h-8 items-center gap-1.5 border-2 border-line px-3 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition hover:border-accent hover:text-accent"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-line px-3 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition-all duration-200 ease-expo-out hover:border-accent/60 hover:text-accent"
             >
               <Icon name="arrow-left" size={13} /> {t("hist.back")}
             </button>
@@ -74,7 +74,7 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
           )}
           <button
             onClick={onClose}
-            className="ms-auto flex h-8 w-8 items-center justify-center border-2 border-line text-muted-foreground transition hover:border-maroon hover:text-maroon"
+            className="ms-auto flex h-8 w-8 items-center justify-center rounded-lg border border-line text-muted-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
             title={t("hist.close")}
           >
             <Icon name="x" size={15} />
@@ -93,23 +93,23 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
                   <li
                     key={c.id}
                     onClick={() => openConv(c.id)}
-                    className="group flex cursor-pointer items-start gap-3 border-2 border-line p-3 transition hover:border-accent"
+                    className="group flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-bg/40 p-3 transition-all duration-200 ease-expo-out hover:border-accent/60"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium text-foreground" dir={isRTL(c.title) ? "rtl" : "ltr"}>
                         {c.title || t("hist.conversation")}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-                        <span className={`px-1.5 py-0.5 font-bold ${STATUS_STYLE[c.status] || "bg-muted text-muted-foreground"}`}>{c.status}</span>
-                        <span className="flex items-center gap-1 px-1.5 py-0.5 font-bold bg-line text-foreground"><Icon name={c.mode === "chat" ? "message" : "bot"} size={11} /> {c.mode === "chat" ? t("hist.chat") : t("hist.agent")}</span>
+                        <span className={`rounded-full px-1.5 py-0.5 font-bold ${STATUS_STYLE[c.status] || "bg-muted text-muted-foreground"}`}>{c.status}</span>
+                        <span className="flex items-center gap-1 rounded-full bg-line px-1.5 py-0.5 font-bold text-foreground"><Icon name={c.mode === "chat" ? "message" : "bot"} size={11} /> {c.mode === "chat" ? t("hist.chat") : t("hist.agent")}</span>
                         {c.mode !== "chat" && <span>{c.num_actions ?? 0} {t("hist.actions")}</span>}
-                        <span className="text-muted">{(c.updated_at || "").replace("T", " ")}</span>
+                        <span className="text-muted-foreground/50">{(c.updated_at || "").replace("T", " ")}</span>
                       </div>
                     </div>
                     <button
                       onClick={(e) => del(c.id, e)}
                       title={t("hist.delete")}
-                      className="flex shrink-0 items-center justify-center border-2 border-line px-2 py-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:border-maroon hover:text-maroon"
+                      className="flex shrink-0 items-center justify-center rounded-lg border border-line px-2 py-1 text-muted-foreground opacity-0 transition-all duration-200 ease-expo-out group-hover:opacity-100 hover:border-maroon hover:text-maroon"
                     >
                       <Icon name="trash" size={14} />
                     </button>
@@ -123,8 +123,8 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
                 {selected.title}
               </div>
               <div className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-                <span className={`px-1.5 py-0.5 font-bold ${STATUS_STYLE[selected.status] || "bg-muted text-muted-foreground"}`}>{selected.status}</span>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 font-bold bg-line text-foreground"><Icon name={selected.mode === "chat" ? "message" : "bot"} size={11} /> {selected.mode === "chat" ? t("hist.chat") : t("hist.agent")}</span>
+                <span className={`rounded-full px-1.5 py-0.5 font-bold ${STATUS_STYLE[selected.status] || "bg-muted text-muted-foreground"}`}>{selected.status}</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-line px-1.5 py-0.5 font-bold text-foreground"><Icon name={selected.mode === "chat" ? "message" : "bot"} size={11} /> {selected.mode === "chat" ? t("hist.chat") : t("hist.agent")}</span>
                 <span>{(selected.updated_at || "").replace("T", " ")}</span>
                 <span>· {selected.track}</span>
               </div>
@@ -135,12 +135,12 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
                   {selected.transcript.map((e, i) =>
                     e.type === "prompt" ? (
                       <div key={i} className="flex justify-end">
-                        <div className="max-w-[85%] border-2 border-accent bg-accent/10 px-3 py-2 text-sm text-foreground" dir={isRTL(String(e.content || "")) ? "rtl" : "ltr"}>
+                        <div className="max-w-[85%] rounded-2xl border border-accent/30 bg-accent/[0.08] px-3 py-2 text-sm text-foreground" dir={isRTL(String(e.content || "")) ? "rtl" : "ltr"}>
                           {String(e.content || "")}
                         </div>
                       </div>
                     ) : e.type === "answer" ? (
-                      <div key={i} className="border-s-2 border-line ps-3">
+                      <div key={i} className="border-s border-accent/40 ps-3">
                         <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.3em] text-accent">Fanar</div>
                         <Markdown content={String(e.content || "")} />
                       </div>
@@ -150,7 +150,7 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
               ) : (
                 <>
                   {(selected.prompts || []).map((p, i) => (
-                    <div key={i} className="mb-3 border-2 border-accent bg-accent/10 px-3 py-2 text-sm text-foreground" dir={isRTL(p) ? "rtl" : "ltr"}>
+                    <div key={i} className="mb-3 rounded-2xl border border-accent/30 bg-accent/[0.08] px-3 py-2 text-sm text-foreground" dir={isRTL(p) ? "rtl" : "ltr"}>
                       {p}
                     </div>
                   ))}
@@ -158,7 +158,7 @@ export function HistoryPanel({ open, onClose, lang = "en" }: { open: boolean; on
                   {trace.length > 0 && <StepTimeline steps={trace} />}
 
                   {selected.final && (
-                    <div className="mt-4 border-t-2 border-line pt-3">
+                    <div className="mt-4 border-t border-line pt-3">
                       <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.3em] text-accent">{t("hist.finalAnswer")}</div>
                       <Markdown content={selected.final} />
                     </div>

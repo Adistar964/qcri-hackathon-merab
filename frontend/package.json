@@ -9,9 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.76",
+    "@react-three/fiber": "^9.6.1",
     "next": "14.2.5",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "three": "^0.185.0"
   },
   "devDependencies": {
     "@types/node": "20.14.10",

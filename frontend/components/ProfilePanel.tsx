@@ -112,8 +112,8 @@ export function ProfilePanel({
   const tab = (id: Section, icon: IconName, label: string) => (
     <button
       onClick={() => setSection(id)}
-      className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-bold uppercase tracking-tight transition ${
-        section === id ? "bg-foreground text-bg" : "text-muted-foreground hover:text-foreground"
+      className={`flex flex-1 items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-bold uppercase tracking-tight transition-all duration-200 ease-expo-out ${
+        section === id ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
       }`}
     >
       <Icon name={icon} size={13} /> {label}
@@ -122,13 +122,13 @@ export function ProfilePanel({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-bg/70 backdrop-blur-sm" onClick={onClose} />
-      <aside className="animate-slide-in relative flex h-full w-full max-w-md flex-col border-s-2 border-line bg-surface">
-        <div className="flex items-center gap-3 border-b-2 border-line px-5 py-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <aside className="animate-slide-in relative flex h-full w-full max-w-md flex-col border-s border-line bg-surface/95 backdrop-blur-xl">
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4">
           <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.2em] text-accent"><Icon name="id-card" size={16} /> {t("panel.title")}</span>
           <button
             onClick={onClose}
-            className="ms-auto flex h-8 w-8 items-center justify-center border-2 border-line text-muted-foreground transition hover:border-maroon hover:text-maroon"
+            className="ms-auto flex h-8 w-8 items-center justify-center rounded-lg border border-line text-muted-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
             title={t("panel.close")}
           >
             <Icon name="x" size={15} />
@@ -136,7 +136,7 @@ export function ProfilePanel({
         </div>
 
         {/* Section switcher (Payment & Credentials live INSIDE this modal) */}
-        <div className="flex border-b-2 border-line">
+        <div className="flex gap-0.5 border-b border-line p-1">
           {tab("info", "id-card", t("panel.tabInfo"))}
           {tab("payment", "credit-card", t("panel.tabPayment"))}
           {tab("credentials", "key", t("panel.tabCredentials"))}
@@ -145,7 +145,7 @@ export function ProfilePanel({
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {section === "info" && (
             <>
-              <div className="mb-5 border-2 border-dashed border-line p-4">
+              <div className="mb-5 rounded-xl border border-dashed border-line bg-bg/40 p-4">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent"><Icon name="upload" size={13} /> {t("panel.uploadQid")}</div>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
                   {t("panel.uploadQidHelp")}
@@ -155,7 +155,7 @@ export function ProfilePanel({
                 <button
                   onClick={() => fileRef.current?.click()}
                   disabled={extracting}
-                  className="mt-3 w-full border-2 border-accent px-4 py-2.5 text-xs font-bold uppercase tracking-tight text-accent transition hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+                  className="mt-3 w-full rounded-xl border border-accent/60 px-4 py-2.5 text-xs font-bold uppercase tracking-tight text-accent transition-all duration-200 ease-expo-out hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
                 >
                   {extracting ? t("panel.readingQid") : t("panel.chooseQid")}
                 </button>
@@ -173,14 +173,14 @@ export function ProfilePanel({
                   <div key={f.key}>
                     <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                       {fieldLabel(lang, f.key, f.label)}
-                      {f.format && <span className="ms-2 lowercase tracking-normal text-muted">({f.format})</span>}
+                      {f.format && <span className="ms-2 lowercase tracking-normal text-muted-foreground/60">({f.format})</span>}
                     </label>
                     <input
                       type={f.type === "date" ? "date" : f.type === "email" ? "email" : f.type === "tel" ? "tel" : "text"}
                       value={draft[f.key] || ""}
                       dir={isRTL(draft[f.key] || "") ? "rtl" : "ltr"}
                       onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-                      className="mt-1 w-full border-b-2 border-line bg-transparent px-0 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
+                      className="mt-1 w-full border-b border-line bg-transparent px-0 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
                     />
                   </div>
                 ))}
@@ -204,7 +204,7 @@ export function ProfilePanel({
                       placeholder={f.placeholder || ""}
                       value={card[f.key] || ""}
                       onChange={(e) => onCardChange(f.key, e.target.value)}
-                      className="mt-1 w-full border-b-2 border-line bg-transparent px-0 py-2 text-sm text-foreground placeholder-muted focus:border-accent focus:outline-none"
+                      className="mt-1 w-full border-b border-line bg-transparent px-0 py-2 text-sm text-foreground placeholder-muted-foreground/50 focus:border-accent focus:outline-none"
                     />
                   </div>
                 ))}
@@ -215,7 +215,7 @@ export function ProfilePanel({
               </label>
               <button
                 onClick={() => { setCard({}); onSavePayment({}); }}
-                className="mt-4 w-full border-2 border-line px-4 py-2 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition hover:border-maroon hover:text-maroon"
+                className="mt-4 w-full rounded-xl border border-line px-4 py-2 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
               >
                 {t("panel.removeCard")}
               </button>
@@ -233,17 +233,17 @@ export function ProfilePanel({
         </div>
 
         {section !== "credentials" && (
-          <div className="flex items-center gap-2 border-t-2 border-line px-5 py-4">
+          <div className="flex items-center gap-2 border-t border-line px-5 py-4">
             <button
               onClick={section === "payment" ? savePayment : saveInfo}
               disabled={saving}
-              className="flex-1 bg-accent px-4 py-3 text-sm font-bold uppercase tracking-tight text-accent-foreground transition hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-bold uppercase tracking-tight text-accent-foreground transition-all duration-200 ease-expo-out hover:opacity-90 active:scale-95 disabled:opacity-50"
             >
               {saving ? t("panel.saving") : saved ? t("panel.saved") : section === "payment" ? t("panel.saveCard") : t("panel.save")}
             </button>
             <button
               onClick={onClose}
-              className="border-2 border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition hover:border-accent"
+              className="rounded-xl border border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition-all duration-200 ease-expo-out hover:border-accent/60"
             >
               {t("panel.done")}
             </button>
@@ -281,7 +281,7 @@ function CredentialsSection({
       </p>
 
       {credentials.length === 0 && (
-        <p className="mb-4 text-[11px] text-muted">
+        <p className="mb-4 text-[11px] text-muted-foreground/60">
           {t("panel.credEmpty")}
         </p>
       )}
@@ -290,10 +290,10 @@ function CredentialsSection({
         {credentials.map((c) => {
           const row = rowOf(c);
           return (
-            <div key={c.host} className="border-2 border-line p-3">
+            <div key={c.host} className="rounded-xl border border-line bg-bg/40 p-3">
               <div className="flex items-center gap-2">
                 <span className="truncate text-[12px] font-bold text-foreground" title={c.url}>{c.label || c.host}</span>
-                <span className="ms-auto shrink-0 text-[10px] text-muted">{c.host}</span>
+                <span className="ms-auto shrink-0 text-[10px] text-muted-foreground/50">{c.host}</span>
               </div>
               <input
                 value={row.username}
@@ -301,7 +301,7 @@ function CredentialsSection({
                 autoComplete="off"
                 dir="auto"
                 onChange={(e) => setEdit((s) => ({ ...s, [c.host]: { ...row, username: e.target.value } }))}
-                className="mt-2 w-full border-b-2 border-line bg-transparent px-0 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
+                className="mt-2 w-full border-b border-line bg-transparent px-0 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
               />
               <div className="mt-1 flex items-center gap-2">
                 <input
@@ -311,7 +311,7 @@ function CredentialsSection({
                   autoComplete="off"
                   dir="auto"
                   onChange={(e) => setEdit((s) => ({ ...s, [c.host]: { ...row, password: e.target.value } }))}
-                  className="w-full border-b-2 border-line bg-transparent px-0 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
+                  className="w-full border-b border-line bg-transparent px-0 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
                 />
                 <button
                   onClick={() => setReveal((r) => ({ ...r, [c.host]: !r[c.host] }))}
@@ -324,13 +324,13 @@ function CredentialsSection({
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => onSave({ host: c.host, url: c.url, label: c.label, username: row.username, password: row.password })}
-                  className="flex-1 bg-accent px-3 py-2 text-[11px] font-bold uppercase tracking-tight text-accent-foreground transition hover:scale-[1.02] active:scale-95"
+                  className="flex-1 rounded-lg bg-accent px-3 py-2 text-[11px] font-bold uppercase tracking-tight text-accent-foreground transition-all duration-200 ease-expo-out hover:opacity-90 active:scale-95"
                 >
                   {t("panel.save")}
                 </button>
                 <button
                   onClick={() => onDelete(c.host)}
-                  className="border-2 border-line px-3 py-2 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition hover:border-maroon hover:text-maroon"
+                  className="rounded-lg border border-line px-3 py-2 text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
                 >
                   {t("panel.delete")}
                 </button>
@@ -341,7 +341,7 @@ function CredentialsSection({
       </div>
 
       {/* Add a new login */}
-      <div className="mt-5 border-2 border-dashed border-line p-3">
+      <div className="mt-5 rounded-xl border border-dashed border-line bg-bg/40 p-3">
         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-accent"><Icon name="plus" size={13} /> {t("panel.addLogin")}</div>
         {(["url", "username", "password", "label"] as const).map((k) => (
           <input
@@ -352,7 +352,7 @@ function CredentialsSection({
             dir="auto"
             value={adding[k]}
             onChange={(e) => setAdding((a) => ({ ...a, [k]: e.target.value }))}
-            className="mt-2 w-full border-b-2 border-line bg-transparent px-0 py-1.5 text-sm text-foreground placeholder-muted focus:border-accent focus:outline-none"
+            className="mt-2 w-full border-b border-line bg-transparent px-0 py-1.5 text-sm text-foreground placeholder-muted-foreground/50 focus:border-accent focus:outline-none"
           />
         ))}
         <button
@@ -361,7 +361,7 @@ function CredentialsSection({
             await onSave(adding);
             setAdding({ url: "", username: "", password: "", label: "" });
           }}
-          className="mt-3 w-full border-2 border-accent px-4 py-2 text-[11px] font-bold uppercase tracking-tight text-accent transition hover:bg-accent hover:text-accent-foreground"
+          className="mt-3 w-full rounded-xl border border-accent/60 px-4 py-2 text-[11px] font-bold uppercase tracking-tight text-accent transition-all duration-200 ease-expo-out hover:bg-accent hover:text-accent-foreground"
         >
           {t("panel.addLoginBtn")}
         </button>

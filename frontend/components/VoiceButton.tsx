@@ -51,11 +51,11 @@ export function VoiceButton({ onTranscript, disabled }: { onTranscript: (text: s
       onClick={recording ? stop : start}
       disabled={disabled || working}
       title="Speak (Fanar Aura STT)"
-      className={`flex h-12 w-12 shrink-0 items-center justify-center border-2 transition active:scale-95 disabled:opacity-40 ${
-        recording ? "animate-pulse border-maroon bg-maroon text-foreground" : "border-line text-muted-foreground hover:border-accent hover:text-accent"
+      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ease-expo-out active:scale-95 disabled:opacity-40 ${
+        recording ? "animate-pulse border-maroon bg-maroon text-foreground" : "border-line bg-surface/40 text-muted-foreground backdrop-blur-sm hover:border-accent/60 hover:text-accent"
       }`}
     >
-      {working ? "…" : recording ? <span className="h-3 w-3 bg-current" /> : <Icon name="mic" size={18} />}
+      {working ? "…" : recording ? <span className="h-3 w-3 rounded-sm bg-current" /> : <Icon name="mic" size={18} />}
     </button>
   );
 }

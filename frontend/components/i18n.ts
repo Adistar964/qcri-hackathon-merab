@@ -36,8 +36,8 @@ const STRINGS: Dict = {
   // ── Command bar ─────────────────────────────────────────────────────────
   "cmd.placeholderAgent": { en: "Command the agent…", ar: "أصدر أمرًا للوكيل…" },
   "cmd.placeholderChat": { en: "Message Fanar…", ar: "راسل فنار…" },
-  "cmd.send": { en: "Send →", ar: "إرسال →" },
-  "cmd.stop": { en: "■ Stop", ar: "■ إيقاف" },
+  "cmd.send": { en: "Send", ar: "إرسال" },
+  "cmd.stop": { en: "Stop", ar: "إيقاف" },
   "cmd.helperAgentDesktop": { en: "Agent can see your screen, control your computer & browser — it pauses for your approval", ar: "يستطيع الوكيل رؤية شاشتك والتحكّم في حاسوبك ومتصفّحك — ويتوقّف لانتظار موافقتك" },
   "cmd.helperAgentWeb": { en: "Agent drives a real browser & pauses for you to log in", ar: "يشغّل الوكيل متصفّحًا حقيقيًا ويتوقّف لتسجيل دخولك" },
   "cmd.helperChat": { en: "Direct chat with Fanar", ar: "محادثة مباشرة مع فنار" },
@@ -57,8 +57,8 @@ const STRINGS: Dict = {
   "hero.title1": { en: "Agentic AI", ar: "ذكاء اصطناعي وكيل" },
   "hero.title2": { en: "for Qatar", ar: "لخدمة قطر" },
   "hero.subtitle": { en: "One agent that acts — it drives a real browser, fills forms, logs in, writes documents, and speaks. Built on Fanar across government, healthcare & education.", ar: "وكيلٌ واحد ينفّذ المهام — يشغّل متصفّحًا حقيقيًا، ويعبّئ النماذج، ويسجّل الدخول، ويكتب المستندات، ويتحدّث. مبنيٌّ على فنار في مجالات الحكومة والصحة والتعليم." },
-  "hero.tryAgent": { en: "── Try an agent task", ar: "── جرّب مهمة للوكيل" },
-  "hero.tryQuestion": { en: "── Try a question", ar: "── جرّب سؤالاً" },
+  "hero.tryAgent": { en: "Try an agent task", ar: "جرّب مهمة للوكيل" },
+  "hero.tryQuestion": { en: "Try a question", ar: "جرّب سؤالاً" },
 
   // ── Live preview ────────────────────────────────────────────────────────
   "live.browser": { en: "Live Browser", ar: "المتصفّح المباشر" },
