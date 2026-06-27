@@ -842,6 +842,57 @@ class AgentRun:
                 yield {"type": "final", "content": raw.strip()}
                 return
 
+            # GUARD: never let the model re-open a portal/gateway URL inside an authenticated
+            # workflow. MOI E-Services errors out ("already logged in elsewhere") and drops the
+            # session if you navigate to its URL again — the page appears to "reload" and the model
+            # then thinks it was logged out and re-asks for credentials. Navigate by CLICKING only.
+            if (tool == "open_page" and self.workflow and self.workflow.get("login_flow")):
+                tgt = str(args.get("url") or "").lower()
+                if any(h in tgt for h in ("eservices.moi.gov.qa", "moi.gov.qa", "tawtheeq.gov.qa")):
+                    note = ("Do NOT open or reload that URL — you are already signed in on this page "
+                            "(re-opening it logs you out). Navigate by CLICKING the on-page links/"
+                            "tabs/buttons instead. You are still logged in; continue the steps.")
+                    yield {"type": "thought", "content": "Skipping a page reload — already signed in; navigating by clicking."}
+                    self.messages.append({"role": "assistant", "content": json.dumps(decision, ensure_ascii=False)})
+                    self.messages.append({"role": "user", "content": f"[Blocked] {note}"})
+                    self._corrections += 1
+                    if self._corrections > 6:
+                        yield {"type": "final", "content": self._t("I couldn't complete the navigation on the portal. Please continue in the browser window.")}
+                        return
+                    continue
+
+            # GUARD: web_search is never appropriate inside an authenticated portal workflow — the
+            # model reached for it to "check if I'm logged in", which derails the task.
+            if (tool == "web_search" and self.workflow and self.workflow.get("login_flow")):
+                yield {"type": "thought", "content": "Staying on the portal — continuing the task instead of searching the web."}
+                self.messages.append({"role": "assistant", "content": json.dumps(decision, ensure_ascii=False)})
+                self.messages.append({"role": "user", "content":
+                    "[Blocked] Do NOT use web_search — you are signed in on the MOI portal. Read the page "
+                    "(see_page) and continue the navigation by clicking the on-page links."})
+                self._corrections += 1
+                if self._corrections > 6:
+                    yield {"type": "final", "content": self._t("I couldn't complete the navigation on the portal. Please continue in the browser window.")}
+                    return
+                continue
+
+            # GUARD: never let the model LOG ITSELF OUT mid-workflow. If it gets confused about the
+            # login state it tends to click "Exit"/"Logout" — which ends the session and breaks the
+            # task. Block logout/exit clicks while inside an authenticated workflow.
+            if (tool in ("click", "click_smart", "click_tab", "click_modal") and self.workflow
+                    and self.workflow.get("login_flow")):
+                tgt = " ".join(str(v) for v in (args.get("target"), args.get("labels"), args.get("label")) if v).lower()
+                if re.search(r"log\s*out|logout|sign\s*out|signout|\bexit\b|تسجيل الخروج|خروج", tgt):
+                    yield {"type": "thought", "content": "Not logging out — staying signed in to finish the task."}
+                    self.messages.append({"role": "assistant", "content": json.dumps(decision, ensure_ascii=False)})
+                    self.messages.append({"role": "user", "content":
+                        "[Blocked] Do NOT log out / click Exit — you ARE signed in and must stay signed in to "
+                        "finish this task. Continue by clicking the service navigation (e.g. 'General Services')."})
+                    self._corrections += 1
+                    if self._corrections > 6:
+                        yield {"type": "final", "content": self._t("I couldn't complete the navigation on the portal. Please continue in the browser window.")}
+                        return
+                    continue
+
             yield {"type": "action", "tool": tool, "input": args}
             self._tools_used += 1
             self.messages.append({"role": "assistant", "content": json.dumps(decision, ensure_ascii=False)})
@@ -1181,7 +1232,30 @@ class AgentRun:
                     f"Auto-filled {spec['label']} (date, mode={mode})."})
                 continue
 
-            # TEXT field → match a numbered box by synonyms, fill it.
+            # TEXT field → FIRST try the viewport-independent smart fill (finds the field by
+            # name/id/placeholder/label anywhere on the page and scrolls to it). This fixes cases
+            # where the field is below the fold or its <label> text didn't match a numbered box
+            # (e.g. the QID box on the MOI traffic-violations form wasn't getting filled).
+            smart_ok = False
+            yield {"type": "action", "tool": "fill_text_smart", "input": {"value": value}}
+            try:
+                sres = self._dispatch("fill_text_smart", {"value": value, "synonyms": spec.get("match", [])})
+                smart_ok = isinstance(sres, dict) and sres.get("text_filled")
+            except Exception as exc:  # noqa: BLE001
+                sres = {"error": str(exc)}
+            self._tools_used += 1
+            self.messages.append({"role": "assistant", "content": json.dumps(
+                {"thought": f"auto-fill {spec['label']}", "action": "fill_text_smart",
+                 "action_input": {"value": "***"}}, ensure_ascii=False)})
+            if isinstance(sres, dict) and sres.get("screenshot"):
+                yield {"type": "screenshot", "url": sres["screenshot"],
+                       "page_url": sres.get("url", ""), "title": sres.get("title", "")}
+            yield {"type": "observation", "tool": "fill_text_smart", "result": _trim(sres)}
+            if smart_ok:
+                self.messages.append({"role": "user", "content": f"Auto-filled {spec['label']}."})
+                continue
+
+            # Fallback → match a numbered box by synonyms, fill it.
             match_n = None
             for el in elements:
                 n = el.get("n")
@@ -1274,12 +1348,17 @@ class AgentRun:
             if isinstance(mres, dict) and mres.get("url"):
                 self._post_login_url = mres.get("url")
 
+        nav = [s for s in (wf.get("navigation") or []) if s]
+        nav_text = (" ".join(f"{i + 1}) {s}" for i, s in enumerate(nav)) if nav
+                    else "Open the requested service from the E-services Catalog.")
         self.messages.append({"role": "user", "content":
-            f"I entered the one-time code, pressed Continue, and clicked Login on the sign-in dialog — "
-            f"you should now be signed in to MOI E-Services. Continue with the NAVIGATE steps (scroll to "
-            f"the E-services Catalog and open the requested service). Do NOT re-enter the username, "
-            f"password, or OTP, and do NOT reopen the sign-in dialog. Use see_page to get numbered boxes "
-            f"before any click.{obj}"})
+            "You ARE now signed in to MOI E-Services — the one-time code was accepted and the sign-in "
+            "dialog was confirmed. The E-services Catalog is on screen. Do NOT verify the login, do NOT "
+            "use web_search, do NOT click Exit / Logout / Sign out, do NOT re-enter the username / "
+            "password / OTP, and do NOT reopen the sign-in dialog or reload the page — you are logged "
+            "in and must stay logged in. Proceed DIRECTLY with these navigation steps, clicking by the "
+            f"visible label shown on the page: {nav_text} Use see_page to get numbered boxes before a "
+            f"click if you need them.{obj}"})
 
     def _do_fill_login(self) -> Iterator[dict[str, Any]]:
         """Sign in deterministically with the user's stored credentials, then continue. Emits a

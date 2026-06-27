@@ -751,6 +751,24 @@ class BrowserSession:
 
         return self._call(op)
 
+    def fill_text_smart(self, value: str, synonyms: list[str] | None = None) -> dict[str, Any]:
+        """Fill a TEXT input by MEANING (no box number) — robust where the box-numbered autofill
+        fails: it scans the whole active scope (not just the viewport), matches the field by its
+        name/id/placeholder/aria-label/associated-<label> against `synonyms` (e.g. ['qid','id number',
+        'الرقم الشخصي']), SCROLLS to it, and sets the value via the native setter (so readonly /
+        framework-controlled fields accept it). Skips captcha/search/password/OTP boxes. If nothing
+        matches but the active form has exactly ONE fillable text input, it uses that."""
+        syns = [str(x).lower() for x in (synonyms or []) if str(x).strip()]
+
+        def op(s: "BrowserSession") -> dict[str, Any]:
+            res = _safe(lambda: s._page.evaluate(_FILL_TEXT_JS, {"value": value, "syn": syns}), {}) or {}
+            s._page.wait_for_timeout(120)
+            st = s._annotated_state()
+            return {"text_filled": bool(res.get("filled")), "matched": res.get("matched", ""),
+                    "value": value, **st}
+
+        return self._call(op)
+
     def fill_login(self, username: str = "", password: str = "", submit: bool = True,
                    scope: str = "", humanize: bool = False) -> dict[str, Any]:
         """Single-page AND multi-step (email→Next→password) logins. Values come from the
@@ -1465,6 +1483,57 @@ _ANNOTATE_JS = r"""
     document.body.appendChild(tag);
   }
   return out;
+}
+"""
+
+
+# --------------------------------------------------------------------------- #
+# Smart TEXT filler (runs in the page): find a text input by meaning (synonyms vs
+# name/id/placeholder/aria/label) ANYWHERE on the page, scroll to it, set value.
+# --------------------------------------------------------------------------- #
+_FILL_TEXT_JS = r"""
+(args) => {
+  const value = String(args.value == null ? '' : args.value);
+  const syn = (args.syn || []).map(s => String(s).toLowerCase()).filter(Boolean);
+  const vis = (el) => { const r = el.getBoundingClientRect(); const st = getComputedStyle(el);
+    return r.width > 4 && r.height > 4 && st.visibility !== 'hidden' && st.display !== 'none' && st.opacity !== '0'; };
+  // Work inside the topmost open modal if there is one, else the whole document.
+  const modalSel = '.modal.show, .modal.in, .modal[style*="display: block"], [role=dialog], .ui-dialog, [class*=modal][class*=show], [class*=modal][class*=open]';
+  const modals = Array.from(document.querySelectorAll(modalSel)).filter(vis);
+  const scope = modals.length ? modals[modals.length - 1] : document;
+  const SKIP = /captcha|search|otp|one.?time|verification|verify|token|csrf|password|pass|pin|secret/i;
+  const labelText = (el) => {
+    let t = '';
+    try { if (el.id) { const l = document.querySelector('label[for="' + (window.CSS && CSS.escape ? CSS.escape(el.id) : el.id) + '"]'); if (l) t += ' ' + l.textContent; } } catch (e) {}
+    const pl = el.closest('label'); if (pl) t += ' ' + pl.textContent;
+    return t;
+  };
+  const hay = (el) => [el.getAttribute('name'), el.id, el.getAttribute('placeholder'),
+    el.getAttribute('aria-label'), el.title, el.getAttribute('autocomplete'), labelText(el)]
+    .filter(Boolean).join(' ').toLowerCase();
+  const cands = Array.from(scope.querySelectorAll('input, textarea')).filter(el => {
+    const ty = (el.getAttribute('type') || 'text').toLowerCase();
+    if (['hidden','submit','button','reset','image','checkbox','radio','file','range','color','password'].includes(ty)) return false;
+    if (!vis(el)) return false;
+    if (SKIP.test(hay(el))) return false;
+    return true;
+  });
+  let target = cands.find(el => syn.some(s => hay(el).includes(s)));
+  if (!target && cands.length === 1) target = cands[0];   // single fillable field → it's the one
+  if (!target) return {filled: false, matched: ''};
+  try { target.scrollIntoView({block: 'center'}); } catch (e) {}
+  try { target.focus(); } catch (e) {}
+  try {
+    const proto = target.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    target.removeAttribute('readonly');
+    setter.call(target, value);
+    target.dispatchEvent(new Event('input', {bubbles: true}));
+    target.dispatchEvent(new Event('change', {bubbles: true}));
+    target.dispatchEvent(new Event('keyup', {bubbles: true}));
+    target.dispatchEvent(new Event('blur', {bubbles: true}));
+  } catch (e) { return {filled: false, matched: ''}; }
+  return {filled: (target.value || '') === value, matched: (target.getAttribute('name') || target.id || hay(target)).slice(0, 40)};
 }
 """
 

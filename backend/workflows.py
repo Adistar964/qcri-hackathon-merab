@@ -51,15 +51,18 @@ INPUT_SPECS: dict[str, dict[str, Any]] = {
         "label": "Qatar ID (QID)",
         "placeholder": "e.g. 28xxxxxxxxxx",
         "type": "text",
-        # Synonyms used to find the field on the page deterministically.
-        "match": ["qid", "id number", "personal number", "civil id", "national id", "qatar id"],
+        # Synonyms used to find the field on the page deterministically (EN + AR — these match the
+        # field's name/id/placeholder/label even when the portal is rendered in Arabic).
+        "match": ["qid", "id number", "personal number", "civil id", "national id", "qatar id",
+                  "الرقم الشخصي", "الرقم الشخصى", "رقم البطاقة", "البطاقة الشخصية", "الرقم الوطني", "هوية"],
     },
     "dob": {
         "profile": "dob",
         "label": "Date of Birth",
         "format": "yyyy/mm/dd",
         "type": "date",
-        "match": ["date of birth", "dob", "birth date", "birthdate"],
+        "match": ["date of birth", "dob", "birth date", "birthdate",
+                  "تاريخ الميلاد", "الميلاد", "تاريخ الولادة"],
     },
     "residence_expiry_date": {
         "profile": "residence_expiry",
@@ -67,14 +70,15 @@ INPUT_SPECS: dict[str, dict[str, Any]] = {
         "format": "yyyy/mm/dd",
         "type": "date",
         "match": ["residence expiry",
-                  "residence permit expiry", "residence expiry date", "expiry date"],
+                  "residence permit expiry", "residence expiry date", "expiry date",
+                  "انتهاء الإقامة", "تاريخ انتهاء الإقامة", "صلاحية الإقامة", "انتهاء الصلاحية"],
     },
     "email": {
         "profile": "email",
         "label": "Email",
         "placeholder": "you@example.com",
         "type": "text",
-        "match": ["email", "e-mail", "mail"],
+        "match": ["email", "e-mail", "mail", "البريد الإلكتروني", "البريد", "الايميل", "بريد"],
     },
 }
 

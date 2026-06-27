@@ -60,6 +60,21 @@ const isOl = (l: string) => /^\s*\d+[.)]\s+/.test(l);
 const isQuote = (l: string) => /^\s*>\s?/.test(l);
 const isHr = (l: string) => /^\s*([-*_])\1\1+\s*$/.test(l);
 
+// ── GFM tables ───────────────────────────────────────────────────────────────
+const splitRow = (l: string): string[] => {
+  let s = l.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|")) s = s.slice(0, -1);
+  return s.split("|").map((c) => c.trim());
+};
+// The "| --- | :--: |" separator under a table header.
+const isTableSep = (l: string): boolean => {
+  if (!l || !l.includes("|")) return false;
+  const cells = splitRow(l);
+  return cells.length >= 1 && cells.every((c) => /^:?-{1,}:?$/.test(c));
+};
+const ALIGN: Record<string, string> = { left: "text-left", right: "text-right", center: "text-center" };
+
 export function Markdown({ content, className = "" }: { content: string; className?: string }) {
   const blocks: ReactNode[] = [];
   const lines = (content || "").replace(/\r\n/g, "\n").split("\n");
@@ -98,6 +113,50 @@ export function Markdown({ content, className = "" }: { content: string; classNa
         </Tag>
       );
       i++;
+      continue;
+    }
+
+    // GFM table: a "| a | b |" header line immediately followed by a "| --- | --- |" separator.
+    if (line.includes("|") && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+      const header = splitRow(line);
+      const aligns = splitRow(lines[i + 1]).map((c) => {
+        const l = c.startsWith(":"), r = c.endsWith(":");
+        return l && r ? "center" : r ? "right" : "left";
+      });
+      i += 2;
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].includes("|") && lines[i].trim() !== "" &&
+             !isFence(lines[i]) && !isHeading(lines[i])) {
+        rows.push(splitRow(lines[i]));
+        i++;
+      }
+      const tkey = key++;
+      blocks.push(
+        <div key={tkey} className="my-3 overflow-x-auto rounded-xl border border-line">
+          <table className="w-full border-collapse text-[13px]">
+            <thead>
+              <tr className="border-b border-line bg-foreground/[0.06]">
+                {header.map((c, ci) => (
+                  <th key={ci} className={`whitespace-nowrap px-3 py-2 font-bold uppercase tracking-tight text-foreground ${ALIGN[aligns[ci]] || "text-left"}`}>
+                    {parseInline(c, `th${tkey}-${ci}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, ri) => (
+                <tr key={ri} className="border-b border-line/40 last:border-0 even:bg-foreground/[0.02]">
+                  {header.map((_, ci) => (
+                    <td key={ci} className={`px-3 py-2 align-top text-foreground/90 ${ALIGN[aligns[ci]] || "text-left"}`}>
+                      {parseInline(r[ci] ?? "", `td${tkey}-${ri}-${ci}`)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
       continue;
     }
 
@@ -145,7 +204,8 @@ export function Markdown({ content, className = "" }: { content: string; classNa
     while (
       i < lines.length && lines[i].trim() !== "" &&
       !isFence(lines[i]) && !isHeading(lines[i]) && !isUl(lines[i]) &&
-      !isOl(lines[i]) && !isQuote(lines[i]) && !isHr(lines[i])
+      !isOl(lines[i]) && !isQuote(lines[i]) && !isHr(lines[i]) &&
+      !(lines[i].includes("|") && i + 1 < lines.length && isTableSep(lines[i + 1]))  // don't swallow a table
     ) {
       buf.push(lines[i]); i++;
     }

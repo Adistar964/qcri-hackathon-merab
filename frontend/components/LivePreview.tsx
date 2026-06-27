@@ -78,9 +78,13 @@ export function LivePreview({
   const streaming = !!sessionId && (busy || !!pending || maximized);
   useEffect(() => {
     if (!streaming) return;
-    const id = setInterval(() => setTick((x) => x + 1), 1100);
+    // Poll fast only while the agent is ACTIVELY working; when paused at a gate (page is static)
+    // poll slowly. Each frame is a real screenshot of the Chrome window, so over-polling a static
+    // page is what makes it look like it's "refreshing"/flickering. Maximized stays responsive.
+    const interval = busy ? 1100 : maximized ? 1500 : 3500;
+    const id = setInterval(() => setTick((x) => x + 1), interval);
     return () => clearInterval(id);
-  }, [streaming]);
+  }, [streaming, busy, maximized]);
   // PRELOAD-THEN-SWAP: fetch each candidate frame off-screen and only swap the visible <img> once
   // it has fully loaded. This (plus the backend reusing its last good frame) stops the embedded
   // browser from flashing/"refreshing" to the empty placeholder between polls.

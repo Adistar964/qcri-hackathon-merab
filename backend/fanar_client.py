@@ -57,17 +57,21 @@ class FanarClient:
         # chat endpoint is slow/down, a call FAILS FAST and the agent surfaces a clear "service
         # unavailable" message instead of hanging for two minutes with no response. Streaming
         # calls only hit this between chunks, so long answers still stream fine.
-        self.timeout = float(timeout if timeout is not None else os.getenv("FANAR_TIMEOUT", "45"))
+        # Generous enough that the FLAGSHIP model's big-context planning calls (24k-token workflow
+        # context) are never cut off and wrongly judged "down" — that downgrade-to-a-weaker-model is
+        # what made the agent wander after login. A genuine outage still fails within this bound.
+        self.timeout = float(timeout if timeout is not None else os.getenv("FANAR_TIMEOUT", "75"))
         # Short, side-task calls (guard / translate) must never stall the start of a response, so
         # they use an even tighter timeout and fail open.
         self.fast_timeout = float(os.getenv("FANAR_FAST_TIMEOUT", "15"))
-        # MODEL FALLBACK: if the requested model is unavailable (Fanar's individual models go
-        # down independently — e.g. "Fanar" can time out while "Fanar-C-1-8.7B" answers in <1s),
-        # transparently retry with the next live model so the app keeps working. A model that times
-        # out is marked DOWN for the rest of the session (circuit breaker) so we don't pay its
-        # timeout on every subsequent call. Configure/disable via FANAR_FALLBACK_MODELS.
+        # MODEL FALLBACK: if the requested model is genuinely unavailable (its chat endpoint times
+        # out / 5xx — Fanar's models go down independently), transparently retry with the next
+        # CAPABLE model so the app keeps working. The small "Fanar-S-1-7B" is deliberately NOT in
+        # this chain — it's too weak for the agentic loop (it caused post-login wandering / logout
+        # attempts), so we only ever fall back to the larger C-2-27B / C-1-8.7B. A failed model is
+        # marked DOWN for FANAR_DOWN_TTL (circuit breaker). Configure via FANAR_FALLBACK_MODELS.
         self.fallback_models = [m.strip() for m in os.getenv(
-            "FANAR_FALLBACK_MODELS", "Fanar-C-1-8.7B,Fanar-S-1-7B,Fanar-C-2-27B").split(",") if m.strip()]
+            "FANAR_FALLBACK_MODELS", "Fanar-C-2-27B,Fanar-C-1-8.7B").split(",") if m.strip()]
         self._down_models: dict[str, float] = {}      # model -> monotonic time it was marked down
         self._down_ttl = float(os.getenv("FANAR_DOWN_TTL", "180"))   # re-probe a down model after this
         self._down_lock = threading.Lock()
@@ -144,10 +148,12 @@ class FanarClient:
         last_exc: FanarError | None = None
         for i, m in enumerate(cands):
             is_last = i == len(cands) - 1
-            # Probe non-final models with the SHORT timeout so a dead model falls back fast.
-            tmo = (timeout or self.timeout) if is_last else min(timeout or self.timeout, self.fast_timeout)
+            # Give EVERY model the FULL timeout — we only fall back on a GENUINE failure, never on a
+            # merely-slow response. (Earlier a 15s "probe" cut off the flagship's big-context planning
+            # calls, marked it down, and silently downgraded to a weaker model — the cause of the
+            # post-login wandering. Guard/translate stay fast by passing a small `timeout` explicitly.)
             try:
-                return self._chat_once(m, messages, temperature, max_tokens, tmo, **kwargs)
+                return self._chat_once(m, messages, temperature, max_tokens, timeout or self.timeout, **kwargs)
             except FanarError as exc:
                 last_exc = exc
                 if not is_last and self._is_transient(exc):
@@ -385,10 +391,9 @@ class FanarClient:
         last_exc: FanarError | None = None
         for i, m in enumerate(cands):
             is_last = i == len(cands) - 1
-            tmo = self.timeout if is_last else min(self.timeout, self.fast_timeout)
             yielded = False
             try:
-                for delta in self._chat_stream_once(m, messages, temperature, max_tokens, tmo, **kwargs):
+                for delta in self._chat_stream_once(m, messages, temperature, max_tokens, self.timeout, **kwargs):
                     yielded = True
                     yield delta
                 return

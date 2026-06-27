@@ -196,6 +196,17 @@ def fill_date_smart(session: BrowserSession, value: str = "", synonyms: Any = No
     return session.fill_date_smart(str(val), list(synonyms or []))
 
 
+def fill_text_smart(session: BrowserSession, value: str = "", synonyms: Any = None, **kwargs: Any) -> dict[str, Any]:
+    """Fill a TEXT field by MEANING (no box number) — finds the field by name/id/placeholder/label
+    matching the synonyms, anywhere on the page (not just the viewport), and sets it robustly."""
+    if synonyms is None:
+        synonyms = kwargs.get("synonym") or kwargs.get("labels") or []
+    if isinstance(synonyms, str):
+        synonyms = [synonyms]
+    val = value or kwargs.get("text") or ""
+    return session.fill_text_smart(str(val), list(synonyms or []))
+
+
 def fill_login(session: BrowserSession, username: str = "", password: str = "", submit: bool = True,
                scope: str = "", humanize: bool = False) -> dict[str, Any]:
     """Fill the page's login form. The agent loop injects the user's credentials here;
@@ -437,7 +448,7 @@ def save_document(filename: str, content: str) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Tools whose first argument is the browser session (injected by the agent loop).
 _BROWSER_TOOLS = {"open_page", "read_page", "see_page", "click_mark", "fill_mark",
-                  "fill_date", "fill_date_smart", "fill_login", "submit_form", "submit_inquiry_form",
+                  "fill_date", "fill_date_smart", "fill_text_smart", "fill_login", "submit_form", "submit_inquiry_form",
                   "capture_captcha", "fill_payment_card", "click_smart", "click_tab", "list_form_fields",
                   "fill_field", "click", "detect_otp", "fill_otp", "click_modal", "fill_service_dialog",
                   "confirm_payment_method", "review_payment", "edit_national_address", "expand_all",
@@ -453,6 +464,7 @@ TOOLS: dict[str, Callable[..., dict[str, Any]]] = {
     "fill_mark": fill_mark,
     "fill_date": fill_date,
     "fill_date_smart": fill_date_smart,
+    "fill_text_smart": fill_text_smart,
     "fill_login": fill_login,
     "submit_form": submit_form,
     "submit_inquiry_form": submit_inquiry_form,
