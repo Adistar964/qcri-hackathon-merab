@@ -164,6 +164,17 @@ const STRINGS: Dict = {
   "hist.conversation": { en: "Conversation", ar: "محادثة" },
   "hist.finalAnswer": { en: "Final Answer", ar: "الإجابة النهائية" },
   "hist.close": { en: "Close", ar: "إغلاق" },
+
+  // ── QID expiry reminder (shown on open when the QID expires within ~1 month) ──
+  "qid.title": { en: "Your QID is expiring soon", ar: "بطاقتك القطرية على وشك الانتهاء" },
+  "qid.titleExpired": { en: "Your QID has expired", ar: "انتهت صلاحية بطاقتك القطرية" },
+  "qid.body": { en: "Your Qatar ID (QID) expires on {date} — in {days}. Renew it now to avoid fines and service interruptions.", ar: "تنتهي صلاحية بطاقتك القطرية بتاريخ {date} — خلال {days}. جدّدها الآن لتجنّب الغرامات وتعطّل الخدمات." },
+  "qid.bodyExpired": { en: "Your Qatar ID (QID) expired on {date} ({days} ago). Renew it as soon as possible.", ar: "انتهت صلاحية بطاقتك القطرية بتاريخ {date} (منذ {days}). جدّدها في أقرب وقت ممكن." },
+  "qid.renew": { en: "Renew Now", ar: "جدّد الآن" },
+  "qid.later": { en: "Later", ar: "لاحقًا" },
+  "qid.day": { en: "1 day", ar: "يوم واحد" },
+  "qid.days": { en: "{n} days", ar: "{n} يومًا" },
+  "qid.today": { en: "today", ar: "اليوم" },
 };
 
 // Human labels for saved-profile / payment fields (values stay English; only the LABEL localises).

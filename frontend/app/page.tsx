@@ -49,6 +49,21 @@ const MARQUEE = [
   "QATAR E-SERVICES", "DESKTOP CONTROL", "HUMAN-IN-THE-LOOP", "POWERED BY FANAR",
 ];
 
+// Whole days from today until `dateStr` (negative = already past). Handles yyyy/mm/dd (the QID
+// field format), dd/mm/yyyy, and anything Date.parse understands. Returns null if unparseable.
+function daysUntil(dateStr?: string): number | null {
+  const s = (dateStr || "").trim();
+  if (!s) return null;
+  let d: Date | null = null;
+  let m = s.match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})/);          // yyyy/mm/dd
+  if (m) d = new Date(+m[1], +m[2] - 1, +m[3]);
+  if (!d) { m = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})/); if (m) d = new Date(+m[3], +m[2] - 1, +m[1]); }  // dd/mm/yyyy
+  if (!d || isNaN(d.getTime())) { const tt = Date.parse(s); if (!isNaN(tt)) d = new Date(tt); }
+  if (!d || isNaN(d.getTime())) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0); d.setHours(0, 0, 0, 0);
+  return Math.round((d.getTime() - today.getTime()) / 86400000);
+}
+
 export default function Home() {
   const [surface, setSurface] = useState<Surface>("web");
   const [mode, setMode] = useState<Mode>("agent");
@@ -68,6 +83,10 @@ export default function Home() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [modeSwitch, setModeSwitch] = useState<Mode | null>(null);  // pending mode-switch confirmation
   const [lang, setLang] = useState<Lang>("en");                      // UI language ("en" | "ar")
+  // QID-expiry reminder shown on open when the QID expires within ~1 month, + a one-tap "Renew Now".
+  const [qidAlert, setQidAlert] = useState<{ date: string; days: number } | null>(null);
+  const [qidDismissed, setQidDismissed] = useState(false);
+  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);  // queued task to auto-send
   const t = makeT(lang);
   const rtl = lang === "ar";
   const sessionId = useRef("");
@@ -116,6 +135,24 @@ export default function Home() {
       refreshCredentials();
     })();
   }, []);
+
+  // QID expiry: once the saved profile loads, warn if the QID expires within ~1 month (or already
+  // has). Shown on every platform open (a session "Later" dismiss hides it until the next load).
+  useEffect(() => {
+    const d = daysUntil(profileValues.qid_expiry);
+    setQidAlert(d !== null && d <= 30 ? { date: profileValues.qid_expiry, days: d } : null);
+  }, [profileValues.qid_expiry]);
+
+  // Auto-send a queued task (e.g. from "Renew Now") once the conversation is fresh + in agent mode.
+  // Deferring via state avoids send() reading the pre-reset messages/session from its closure.
+  useEffect(() => {
+    if (pendingPrompt && mode === "agent" && messages.length === 0 && !busy) {
+      const p = pendingPrompt;
+      setPendingPrompt(null);
+      send(p);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingPrompt, mode, messages.length, busy]);
 
   async function savePayment(values: Record<string, string>) {
     try {
@@ -382,6 +419,17 @@ export default function Home() {
     clearUI();
   }
 
+  // "Renew Now" from the QID-expiry reminder: open a FRESH agent conversation and auto-send the
+  // renewal task (queued via pendingPrompt so it fires after the reset; matches the qid_renewal
+  // workflow). Sends the prompt in the active UI language.
+  function renewNow() {
+    setQidDismissed(true);
+    const prompt = lang === "ar" ? "أريد تجديد البطاقة القطرية." : "Renew my Qatar ID (QID).";
+    if (mode !== "agent") doSwitchMode("agent"); else newConversation();
+    setPendingPrompt(prompt);
+  }
+  const daysLabel = (n: number) => (n === 1 ? t("qid.day") : t("qid.days", { n: String(n) }));
+
   const fresh = messages.length === 0;
 
   // Shared chrome-button styling (nav + window controls).
@@ -611,6 +659,38 @@ export default function Home() {
                 className="rounded-xl border border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition-all duration-200 ease-expo-out hover:border-maroon hover:text-maroon"
               >
                 {t("switch.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QID-expiry reminder — shown on open when the QID expires within ~1 month (or already has).
+          "Renew Now" opens a fresh agent conversation and auto-starts the renewal task. */}
+      {qidAlert && !qidDismissed && !busy && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
+             onClick={() => setQidDismissed(true)}>
+          <div className="glow animate-scale-in w-full max-w-md rounded-2xl border border-maroon/50 bg-surface/90 p-6 backdrop-blur-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-maroon">
+              <Icon name="alert" size={16} /> {qidAlert.days < 0 ? t("qid.titleExpired") : t("qid.title")}
+            </div>
+            <p className="text-sm leading-relaxed text-foreground" dir="auto">
+              {qidAlert.days < 0
+                ? t("qid.bodyExpired", { date: qidAlert.date, days: daysLabel(Math.abs(qidAlert.days)) })
+                : t("qid.body", { date: qidAlert.date, days: qidAlert.days === 0 ? t("qid.today") : daysLabel(qidAlert.days) })}
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={renewNow}
+                className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-bold uppercase tracking-tight text-accent-foreground transition-all duration-200 ease-expo-out hover:opacity-90 hover:scale-[1.02] active:scale-95"
+              >
+                <span className="flex items-center justify-center gap-1.5"><Icon name="id-card" size={15} /> {t("qid.renew")}</span>
+              </button>
+              <button
+                onClick={() => setQidDismissed(true)}
+                className="rounded-xl border border-line px-4 py-3 text-sm font-bold uppercase tracking-tight text-foreground transition-all duration-200 ease-expo-out hover:border-foreground"
+              >
+                {t("qid.later")}
               </button>
             </div>
           </div>

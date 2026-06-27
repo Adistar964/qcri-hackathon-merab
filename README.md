@@ -5,7 +5,7 @@
 > Building Agentic AI Solutions for Societal Impact · Fanar Hackathon 2026
 > Track 1 (Smart Government & Citizen Services), extended into Healthcare and Education.
 
-MERAB Agent is not a chatbot. It is an autonomous agent that understands what a resident of Qatar needs (in Modern Standard Arabic, Gulf dialect, or English), finds the correct official service, and then actually does the task end to end inside a real browser: it navigates the portal, fills the forms, reads the result, and reports back, pausing for your approval at every sensitive step. The same agent also explains medications and writes patient instructions, and builds lessons, quizzes, and flashcards for education and heritage.
+MERAB Agent is not a chatbot. It is an autonomous agent that understands what a resident of Qatar needs (in Modern Standard Arabic, Gulf dialect, or English), finds the correct official service, and then actually does the task end to end inside a real browser: it navigates the portal, fills the forms, reads the result, and reports back, pausing for your approval at every sensitive step. The same agent also fetches medications and latest lab results.
 
 Fanar is the brain at every layer: planning, language understanding, Arabic generation, vision, speech, safety, and localization.
 
@@ -65,6 +65,7 @@ One unified agent spans three domains. It decides, per request, whether to answe
 * Builds structured lesson plans, multiple-choice quizzes with answer keys, and front-and-back flashcards.
 * Explains concepts simply with an analogy and a check-for-understanding question.
 * Tutors in Arabic and English and celebrates Arabic language and heritage. Generated materials are saved to a workspace.
+* Helps apply to different universities.
 
 ### Across all three domains
 * **Bilingual, dialect-aware.** Speak or type in Arabic (including Gulf dialect) or English. The agent answers in your language and writes Arabic natively.
